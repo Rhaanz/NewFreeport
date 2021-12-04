@@ -41,25 +41,32 @@ public:
 	HateList();
 	~HateList();
 
-	Mob *GetClosestEntOnHateList(Mob *hater);
-	Mob *GetDamageTopOnHateList(Mob *hater);
-	Mob *GetEntWithMostHateOnList(Mob *center, Mob *skip = nullptr);
-	Mob *GetRandomEntOnHateList();
-	Mob *GetEntWithMostHateOnList();
+	Mob *GetClosestEntOnHateList(Mob *hater, bool skip_mezzed = false);
+	Mob *GetDamageTopOnHateList(Mob *hater); // didn't add 'skip_mezzed' due to calls being in ::Death()
+	Mob *GetEntWithMostHateOnList(Mob *center, Mob *skip = nullptr, bool skip_mezzed = false);
+	Mob *GetRandomEntOnHateList(bool skip_mezzed = false);
+	Mob *GetEntWithMostHateOnList(bool skip_mezzed = false);
 	Mob *GetEscapingEntOnHateList(); // returns first eligble entity
 	Mob *GetEscapingEntOnHateList(Mob *center, float range = 0.0f, bool first = false);
+
+#ifdef BOTS
+	Bot* GetRandomBotOnHateList(bool skip_mezzed = false);
+#endif
+	Client* GetRandomClientOnHateList(bool skip_mezzed = false);
+	NPC* GetRandomNPCOnHateList(bool skip_mezzed = false);
 
 	bool IsEntOnHateList(Mob *mob);
 	bool IsHateListEmpty();
 	bool RemoveEntFromHateList(Mob *ent);
 
 	int AreaRampage(Mob *caster, Mob *target, int count, ExtraAttackOptions *opts);
-	int GetSummonedPetCountOnHateList(Mob *hater);
+	int GetSummonedPetCountOnHateList();
 	int GetHateRatio(Mob *top, Mob *other);
 
 	int32 GetEntHateAmount(Mob *ent, bool in_damage = false);
 
 	std::list<struct_HateList*>& GetHateList() { return list; }
+	std::list<struct_HateList*> GetHateListByDistance(int distance = 0);
 
 	void AddEntToHateList(Mob *ent, int32 in_hate = 0, int32 in_damage = 0, bool in_is_frenzied = false, bool add_to_hate_list_if_not_exist = true);
 	void DoFactionHits(int32 npc_faction_level_id);

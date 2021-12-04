@@ -3,7 +3,7 @@
 #include "../eqemu_logsys.h"
 
 EQ::Net::ServertalkLegacyClient::ServertalkLegacyClient(const std::string &addr, int port, bool ipv6)
-	: m_timer(std::unique_ptr<EQ::Timer>(new EQ::Timer(100, true, std::bind(&EQ::Net::ServertalkLegacyClient::Connect, this))))
+	: m_timer(std::make_unique<EQ::Timer>(100, true, std::bind(&EQ::Net::ServertalkLegacyClient::Connect, this)))
 {
 	m_port = port;
 	m_ipv6 = ipv6;
@@ -58,15 +58,15 @@ void EQ::Net::ServertalkLegacyClient::Connect()
 	m_connecting = true;
 	EQ::Net::TCPConnection::Connect(m_addr, m_port, false, [this](std::shared_ptr<EQ::Net::TCPConnection> connection) {
 		if (connection == nullptr) {
-			LogF(Logs::General, Logs::TCP_Connection, "Error connecting to {0}:{1}, attempting to reconnect...", m_addr, m_port);
+			LogF(Logs::General, Logs::TCPConnection, "Error connecting to {0}:{1}, attempting to reconnect...", m_addr, m_port);
 			m_connecting = false;
 			return;
 		}
 
-		LogF(Logs::General, Logs::TCP_Connection, "Connected to {0}:{1}", m_addr, m_port);
+		LogF(Logs::General, Logs::TCPConnection, "Connected to {0}:{1}", m_addr, m_port);
 		m_connection = connection;
 		m_connection->OnDisconnect([this](EQ::Net::TCPConnection *c) {
-			LogF(Logs::General, Logs::TCP_Connection, "Connection lost to {0}:{1}, attempting to reconnect...", m_addr, m_port);
+			LogF(Logs::General, Logs::TCPConnection, "Connection lost to {0}:{1}, attempting to reconnect...", m_addr, m_port);
 			m_connection.reset();
 		});
 

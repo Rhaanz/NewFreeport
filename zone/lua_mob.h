@@ -9,6 +9,11 @@ struct Lua_HateList;
 class Lua_Item;
 class Lua_ItemInst;
 class Lua_StatBonuses;
+#ifdef BOTS
+class Lua_Bot;
+#endif
+class Lua_NPC;
+class Lua_Client;
 
 namespace luabind {
 	struct scope;
@@ -82,6 +87,8 @@ public:
 	bool IsInvisible(Lua_Mob other);
     void SetInvisible(int state);
 	bool FindBuff(int spell_id);
+	uint16 FindBuffBySlot(int slot);
+	uint32 BuffCount();
     bool FindType(int type);
 	bool FindType(int type, bool offensive);
 	bool FindType(int type, bool offensive, int threshold);
@@ -90,6 +97,8 @@ public:
 	int GetBaseGender();
 	int GetDeity();
 	int GetRace();
+	const char *GetClassName();
+	const char *GetRaceName();
 	int GetGender();
 	int GetTexture();
 	int GetHelmTexture();
@@ -106,6 +115,7 @@ public:
 	int GetClass();
 	int GetLevel();
 	const char *GetCleanName();
+	const char *GetLastName();
 	Lua_Mob GetTarget();
 	void SetTarget(Lua_Mob t);
 	double GetHPRatio();
@@ -122,6 +132,7 @@ public:
 	int SetMana(int mana);
 	double GetManaRatio();
 	int GetAC();
+	int GetDisplayAC();
 	int GetATK();
 	int GetSTR();
 	int GetSTA();
@@ -164,10 +175,13 @@ public:
 	void SetCurrentWP(int wp);
 	double GetSize();
 	void Message(int type, const char *message);
-	void Message_StringID(int type, int string_id, uint32 distance);
+	void MessageString(int type, int string_id, uint32 distance);
 	void Say(const char *message);
+	void Say(const char* message, int language);
 	void QuestSay(Lua_Client client, const char *message);
+	void QuestSay(Lua_Client client, const char *message, luabind::adl::object opts);
 	void Shout(const char *message);
+	void Shout(const char* message, int language);
 	void Emote(const char *message);
 	void InterruptSpell();
 	void InterruptSpell(int spell_id);
@@ -190,9 +204,18 @@ public:
 	Lua_Mob GetPet();
 	Lua_Mob GetOwner();
 	Lua_HateList GetHateList();
+	Lua_HateList GetShuffledHateList();
+	Lua_HateList GetHateListByDistance();
+	Lua_HateList GetHateListByDistance(int distance);
 	Lua_Mob GetHateTop();
 	Lua_Mob GetHateDamageTop(Lua_Mob other);
 	Lua_Mob GetHateRandom();
+#ifdef BOTS
+	Lua_Bot GetHateRandomBot();
+#endif
+	Lua_Client GetHateRandomClient();
+	Lua_NPC GetHateRandomNPC();
+	Lua_Mob GetHateClosest();
 	void AddToHateList(Lua_Mob other);
 	void AddToHateList(Lua_Mob other, int hate);
 	void AddToHateList(Lua_Mob other, int hate, int damage);
@@ -339,9 +362,10 @@ public:
 	void DelGlobal(const char *varname);
 	void SetSlotTint(int material_slot, int red_tint, int green_tint, int blue_tint);
 	void WearChange(int material_slot, int texture, uint32 color);
-	void DoKnockback(Lua_Mob caster, uint32 pushback, uint32 pushup);
+	void DoKnockback(Lua_Mob caster, uint32 push_back, uint32 push_up);
 	void AddNimbusEffect(int effect_id);
 	void RemoveNimbusEffect(int effect_id);
+	void RemoveAllNimbusEffects();
 	bool IsRunning();
 	void SetRunning(bool running);
 	void SetBodyType(int new_body, bool overwrite_orig);
@@ -349,7 +373,7 @@ public:
 	void ModSkillDmgTaken(int skill, int value);
 	int GetModSkillDmgTaken(int skill);
 	int GetSkillDmgTaken(int skill);
-	int GetFcDamageAmtIncoming(Lua_Mob caster, uint32 spell_id, bool use_skill, uint16 skill);
+	int GetFcDamageAmtIncoming(Lua_Mob caster, int32 spell_id);
 	int GetSkillDmgAmt(uint16 skill);
 	void SetAllowBeneficial(bool value);
 	bool GetAllowBeneficial();
@@ -398,10 +422,13 @@ public:
 	bool HasOwner();
 	bool IsPet();
 	bool HasPet();
+	void RemovePet();
+	void SetPet(Lua_Mob new_pet);
 	bool IsSilenced();
 	bool IsAmnesiad();
 	int32 GetMeleeMitigation();
 	int GetWeaponDamageBonus(Lua_Item weapon, bool offhand);
+	int GetItemStat(uint32 itemid, const char* identifier);
 	Lua_StatBonuses GetItemBonuses();
 	Lua_StatBonuses GetSpellBonuses();
 	Lua_StatBonuses GetAABonuses();
@@ -416,6 +443,16 @@ public:
 	int GetBodyType();
 	int GetOrigBodyType();
 	void CheckNumHitsRemaining(int type, int32 buff_slot, uint16 spell_id);
+	void DeleteBucket(std::string bucket_name);
+	std::string GetBucket(std::string bucket_name);
+	std::string GetBucketExpires(std::string bucket_name);
+	std::string GetBucketKey();
+	std::string GetBucketRemaining(std::string bucket_name);
+	void SetBucket(std::string bucket_name, std::string bucket_value);
+	void SetBucket(std::string bucket_name, std::string bucket_value, std::string expiration);
+	bool IsHorse();
+	bool CanClassEquipItem(uint32 item_id);
+	bool CanRaceEquipItem(uint32 item_id);
 };
 
 #endif

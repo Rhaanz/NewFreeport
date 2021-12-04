@@ -1,21 +1,3 @@
-/*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2009 EQEMu Development Team (http://eqemulator.net)
-
-	This program is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation; version 2 of the License.
-
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY except by those people which sell it, which
-		are required to give you total support for your newly bought product;
-		without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-		A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-*/
-
 #include "../common/features.h"
 #include "client.h"
 
@@ -35,23 +17,28 @@
 #undef THIS
 #endif
 
+#define VALIDATE_THIS_IS_HATE \
+	do { \
+		if (sv_derived_from(ST(0), "HateEntry")) { \
+			IV tmp = SvIV((SV*)SvRV(ST(0))); \
+			THIS = INT2PTR(struct_HateList*, tmp); \
+		} else { \
+			Perl_croak(aTHX_ "THIS is not of type HateEntry"); \
+		} \
+		if (THIS == nullptr) { \
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash."); \
+		} \
+	} while (0);
+
 XS(XS_HateEntry_GetEnt); /* prototype to pass -Wmissing-prototypes */
 XS(XS_HateEntry_GetEnt) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: HateEntry::GetData(THIS)");
+		Perl_croak(aTHX_ "Usage: HateEntry::GetData(THIS)"); // @categories Script Utility, Hate and Aggro
 	{
 		struct_HateList *THIS;
 		Mob             *RETVAL;
-
-		if (sv_derived_from(ST(0), "HateEntry")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(struct_HateList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type tHateEntry");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_HATE;
 		RETVAL = THIS->entity_on_hatelist;
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Mob", (void *) RETVAL);
@@ -63,20 +50,12 @@ XS(XS_HateEntry_GetHate); /* prototype to pass -Wmissing-prototypes */
 XS(XS_HateEntry_GetHate) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: HateEntry::GetHate(THIS)");
+		Perl_croak(aTHX_ "Usage: HateEntry::GetHate(THIS)"); // @categories Script Utility, Hate and Aggro
 	{
 		struct_HateList *THIS;
 		int32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "HateEntry")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(struct_HateList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type tHateEntry");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_HATE;
 		RETVAL = THIS->stored_hate_amount;
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -88,20 +67,12 @@ XS(XS_HateEntry_GetDamage); /* prototype to pass -Wmissing-prototypes */
 XS(XS_HateEntry_GetDamage) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: HateEntry::GetDamage(THIS)");
+		Perl_croak(aTHX_ "Usage: HateEntry::GetDamage(THIS)"); // @categories Script Utility, Hate and Aggro
 	{
 		struct_HateList *THIS;
 		int32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "HateEntry")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(struct_HateList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type tHateEntry");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_HATE;
 		RETVAL = THIS->hatelist_damage;
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -127,11 +98,9 @@ XS(boot_HateEntry) {
 	//add the strcpy stuff to get rid of const warnings....
 
 	XS_VERSION_BOOTCHECK;
-
-	newXSproto(strcpy(buf, "GetEnt"), XS_HateEntry_GetEnt, file, "$");
 	newXSproto(strcpy(buf, "GetDamage"), XS_HateEntry_GetDamage, file, "$");
+	newXSproto(strcpy(buf, "GetEnt"), XS_HateEntry_GetEnt, file, "$");
 	newXSproto(strcpy(buf, "GetHate"), XS_HateEntry_GetHate, file, "$");
-
 	XSRETURN_YES;
 }
 

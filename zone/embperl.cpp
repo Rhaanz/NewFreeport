@@ -32,11 +32,17 @@ EXTERN_C XS(boot_Corpse);
 EXTERN_C XS(boot_EntityList);
 EXTERN_C XS(boot_Group);
 EXTERN_C XS(boot_Raid);
+EXTERN_C XS(boot_Inventory);
 EXTERN_C XS(boot_QuestItem);
+EXTERN_C XS(boot_Spell);
 EXTERN_C XS(boot_HateEntry);
 EXTERN_C XS(boot_Object);
 EXTERN_C XS(boot_Doors);
 EXTERN_C XS(boot_PerlPacket);
+EXTERN_C XS(boot_Expedition);
+#ifdef BOTS
+EXTERN_C XS(boot_Bot);
+#endif
 #endif
 #endif
 
@@ -83,10 +89,18 @@ EXTERN_C void xs_init(pTHX)
 	newXS(strcpy(buf, "PerlPacket::boot_PerlPacket"), boot_PerlPacket, file);
 	newXS(strcpy(buf, "Group::boot_Group"), boot_Group, file);
 	newXS(strcpy(buf, "Raid::boot_Raid"), boot_Raid, file);
+	newXS(strcpy(buf, "Inventory::boot_Inventory"), boot_Inventory, file);
 	newXS(strcpy(buf, "QuestItem::boot_QuestItem"), boot_QuestItem, file);
+	newXS(strcpy(buf, "Spell::boot_Spell"), boot_Spell, file);
 	newXS(strcpy(buf, "HateEntry::boot_HateEntry"), boot_HateEntry, file);
 	newXS(strcpy(buf, "Object::boot_Object"), boot_Object, file);
 	newXS(strcpy(buf, "Doors::boot_Doors"), boot_Doors, file);
+	newXS(strcpy(buf, "Expedition::boot_Expedition"), boot_Expedition, file);
+#ifdef BOTS
+	newXS(strcpy(buf, "Bot::boot_Mob"), boot_Mob, file);
+	newXS(strcpy(buf, "Bot::boot_NPC"), boot_NPC, file);
+	newXS(strcpy(buf, "Bot::boot_Bot"), boot_Bot, file);
+#endif
 ;
 #endif
 #endif
@@ -137,15 +151,15 @@ void Embperl::DoInit() {
 	try {
 		init_eval_file();
 	}
-	catch(const char *err)
+	catch(std::string e)
 	{
 		//remember... lasterr() is no good if we crap out here, in construction
-		Log(Logs::General, Logs::Quests, "perl error: %s", err);
+		LogQuests("Perl Error [{}]", e);
 		throw "failed to install eval_file hook";
 	}
 
 #ifdef EMBPERL_IO_CAPTURE
-	Log(Logs::General, Logs::Quests, "Tying perl output to eqemu logs");
+	LogQuests("Tying perl output to eqemu logs");
 	//make a tieable class to capture IO and pass it into EQEMuLog
 	eval_pv(
 		"package EQEmuIO; "
@@ -170,16 +184,16 @@ void Embperl::DoInit() {
 		,FALSE
 	);
 
-	Log(Logs::General, Logs::Quests, "Loading perlemb plugins.");
+	LogQuests("Loading perlemb plugins");
 	try
 	{
 		std::string perl_command;
 		perl_command = "main::eval_file('plugin', '" + Config->PluginPlFile + "');";
 		eval_pv(perl_command.c_str(), FALSE);
 	}
-	catch(const char *err)
+	catch(std::string e)
 	{
-		Log(Logs::General, Logs::Quests, "Warning - %s: %s", Config->PluginPlFile.c_str(), err);
+		LogQuests("Warning [{}]: [{}]", Config->PluginPlFile, e);
 	}
 	try
 	{
@@ -195,9 +209,9 @@ void Embperl::DoInit() {
 			"}";
 		eval_pv(perl_command.c_str(),FALSE);
 	}
-	catch(const char *err)
+	catch(std::string e)
 	{
-		Log(Logs::General, Logs::Quests, "Perl warning: %s", err);
+		LogQuests("Warning [{}]", e);
 	}
 #endif //EMBPERL_PLUGIN
 	in_use = false;
@@ -237,7 +251,7 @@ void Embperl::init_eval_file(void)
 {
 	eval_pv(
 		"our %Cache;"
-		"no warnings;"
+		"no warnings 'all';"
 		"use Symbol qw(delete_package);"
 		"sub eval_file {"
 			"my($package, $filename) = @_;"
@@ -315,7 +329,7 @@ int Embperl::dosub(const char * subname, const std::vector<std::string> * args, 
 	{
 		std::string errmsg = "Perl runtime error: ";
 		errmsg += SvPVX(ERRSV);
-		throw errmsg.c_str();
+		throw errmsg;
 	}
 
 	return ret_value;

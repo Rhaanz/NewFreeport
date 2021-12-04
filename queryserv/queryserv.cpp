@@ -42,27 +42,27 @@ const queryservconfig *Config;
 WorldServer *worldserver = 0;
 EQEmuLogSys LogSys;
 
-void CatchSignal(int sig_num) { 
-	RunLoops = false; 
+void CatchSignal(int sig_num) {
+	RunLoops = false;
 }
 
 int main() {
 	RegisterExecutablePlatform(ExePlatformQueryServ);
 	LogSys.LoadLogSettingsDefaults();
-	set_exception_handler(); 
-	Timer LFGuildExpireTimer(60000);  
+	set_exception_handler();
+	Timer LFGuildExpireTimer(60000);
 
-	Log(Logs::General, Logs::QS_Server, "Starting EQEmu QueryServ.");
+	LogInfo("Starting EQEmu QueryServ");
 	if (!queryservconfig::LoadConfig()) {
-		Log(Logs::General, Logs::QS_Server, "Loading server configuration failed.");
+		LogInfo("Loading server configuration failed");
 		return 1;
 	}
 
-	Config = queryservconfig::get(); 
-	WorldShortName = Config->ShortName; 
+	Config = queryservconfig::get();
+	WorldShortName = Config->ShortName;
 
-	Log(Logs::General, Logs::QS_Server, "Connecting to MySQL...");
-	
+	LogInfo("Connecting to MySQL");
+
 	/* MySQL Connection */
 	if (!database.Connect(
 		Config->QSDatabaseHost.c_str(),
@@ -70,32 +70,32 @@ int main() {
 		Config->QSDatabasePassword.c_str(),
 		Config->QSDatabaseDB.c_str(),
 		Config->QSDatabasePort)) {
-		Log(Logs::General, Logs::QS_Server, "Cannot continue without a database connection.");
+		LogInfo("Cannot continue without a database connection");
 		return 1;
 	}
 
-	/* Register Log System and Settings */
-	database.LoadLogSettings(LogSys.log_settings);
-	LogSys.StartFileLogs();
+	LogSys.SetDatabase(&database)
+		->LoadLogDatabaseSettings()
+		->StartFileLogs();
 
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
-		Log(Logs::General, Logs::QS_Server, "Could not set signal handler");
+		LogInfo("Could not set signal handler");
 		return 1;
 	}
 	if (signal(SIGTERM, CatchSignal) == SIG_ERR)	{
-		Log(Logs::General, Logs::QS_Server, "Could not set signal handler");
+		LogInfo("Could not set signal handler");
 		return 1;
 	}
 
 	/* Initial Connection to Worldserver */
 	worldserver = new WorldServer;
-	worldserver->Connect(); 
+	worldserver->Connect();
 
 	/* Load Looking For Guild Manager */
 	lfguildmanager.LoadDatabase();
 
-	while(RunLoops) { 
-		Timer::SetCurrentTime(); 
+	while(RunLoops) {
+		Timer::SetCurrentTime();
 		if(LFGuildExpireTimer.Check())
 			lfguildmanager.ExpireEntries();
 

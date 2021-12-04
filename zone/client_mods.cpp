@@ -44,7 +44,7 @@ int32 Client::GetMaxStat() const
 	if (level < 61) {
 		base = 275;
 	}
-	else if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF) {
+	else if (ClientVersion() >= EQ::versions::ClientVersion::SoF) {
 		base = 275 + 5 * (level - 60);
 	}
 	else if (level < 71) {
@@ -328,14 +328,15 @@ int32 Client::CalcMaxHP()
 	if (current_hp > max_hp) {
 		current_hp = max_hp;
 	}
-	int hp_perc_cap = spellbonuses.HPPercCap[0];
+	int hp_perc_cap = spellbonuses.HPPercCap[SBIndex::RESOURCE_PERCENT_CAP];
 	if (hp_perc_cap) {
 		int curHP_cap = (max_hp * hp_perc_cap) / 100;
-		if (current_hp > curHP_cap || (spellbonuses.HPPercCap[1] && current_hp > spellbonuses.HPPercCap[1])) {
+		if (current_hp > curHP_cap || (spellbonuses.HPPercCap[SBIndex::RESOURCE_AMOUNT_CAP] && current_hp > spellbonuses.HPPercCap[SBIndex::RESOURCE_AMOUNT_CAP])) {
 
 			current_hp = curHP_cap;
 		}
 	}
+
 	return max_hp;
 }
 
@@ -478,7 +479,7 @@ uint32 Mob::GetClassLevelFactor()
 
 int32 Client::CalcBaseHP()
 {
-	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+	if (ClientVersion() >= EQ::versions::ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
 		int stats = GetSTA();
 		if (stats > 255) {
 			stats = (stats - 255) / 2;
@@ -554,8 +555,8 @@ int32 Client::GetRawItemAC()
 {
 	int32 Total = 0;
 	// this skips MainAmmo..add an '=' conditional if that slot is required (original behavior)
-	for (int16 slot_id = EQEmu::invslot::BONUS_BEGIN; slot_id <= EQEmu::invslot::BONUS_STAT_END; slot_id++) {
-		const EQEmu::ItemInstance* inst = m_inv[slot_id];
+	for (int16 slot_id = EQ::invslot::BONUS_BEGIN; slot_id <= EQ::invslot::BONUS_STAT_END; slot_id++) {
+		const EQ::ItemInstance* inst = m_inv[slot_id];
 		if (inst && inst->IsClassCommon()) {
 			Total += inst->GetItem()->AC;
 		}
@@ -576,7 +577,7 @@ int32 Client::CalcMaxMana()
 				break;
 			}
 		default: {
-				Log(Logs::Detail, Logs::Spells, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
+				LogSpells("Invalid Class [{}] in CalcMaxMana", GetCasterClass());
 				max_mana = 0;
 				break;
 			}
@@ -587,14 +588,14 @@ int32 Client::CalcMaxMana()
 	if (current_mana > max_mana) {
 		current_mana = max_mana;
 	}
-	int mana_perc_cap = spellbonuses.ManaPercCap[0];
+	int mana_perc_cap = spellbonuses.ManaPercCap[SBIndex::RESOURCE_PERCENT_CAP];
 	if (mana_perc_cap) {
 		int curMana_cap = (max_mana * mana_perc_cap) / 100;
-		if (current_mana > curMana_cap || (spellbonuses.ManaPercCap[1] && current_mana > spellbonuses.ManaPercCap[1])) {
+		if (current_mana > curMana_cap || (spellbonuses.ManaPercCap[SBIndex::RESOURCE_AMOUNT_CAP] && current_mana > spellbonuses.ManaPercCap[SBIndex::RESOURCE_AMOUNT_CAP])) {
 			current_mana = curMana_cap;
 		}
 	}
-	Log(Logs::Detail, Logs::Spells, "Client::CalcMaxMana() called for %s - returning %d", GetName(), max_mana);
+	LogSpells("Client::CalcMaxMana() called for [{}] - returning [{}]", GetName(), max_mana);
 	return max_mana;
 }
 
@@ -609,15 +610,14 @@ int32 Client::CalcBaseMana()
 	switch (GetCasterClass()) {
 		case 'I':
 			WisInt = GetINT();
-			if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+			if (ClientVersion() >= EQ::versions::ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+				ConvertedWisInt = WisInt;
+				int over200 = WisInt;
 				if (WisInt > 100) {
-					ConvertedWisInt = (((WisInt - 100) * 5 / 2) + 100);
-					if (WisInt > 201) {
-						ConvertedWisInt -= ((WisInt - 201) * 5 / 4);
+					if (WisInt > 200) {
+						over200 = (WisInt - 200) / -2 + WisInt;
 					}
-				}
-				else {
-					ConvertedWisInt = WisInt;
+					ConvertedWisInt = (3 * over200 - 300) / 2 + over200;
 				}
 				auto base_data = database.GetBaseData(GetLevel(), GetClass());
 				if (base_data) {
@@ -642,15 +642,14 @@ int32 Client::CalcBaseMana()
 			break;
 		case 'W':
 			WisInt = GetWIS();
-			if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+			if (ClientVersion() >= EQ::versions::ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+				ConvertedWisInt = WisInt;
+				int over200 = WisInt;
 				if (WisInt > 100) {
-					ConvertedWisInt = (((WisInt - 100) * 5 / 2) + 100);
-					if (WisInt > 201) {
-						ConvertedWisInt -= ((WisInt - 201) * 5 / 4);
+					if (WisInt > 200) {
+						over200 = (WisInt - 200) / -2 + WisInt;
 					}
-				}
-				else {
-					ConvertedWisInt = WisInt;
+					ConvertedWisInt = (3 * over200 - 300) / 2 + over200;
 				}
 				auto base_data = database.GetBaseData(GetLevel(), GetClass());
 				if (base_data) {
@@ -678,13 +677,13 @@ int32 Client::CalcBaseMana()
 				break;
 			}
 		default: {
-				Log(Logs::General, Logs::None, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
+				LogDebug("Invalid Class [{}] in CalcMaxMana", GetCasterClass());
 				max_m = 0;
 				break;
 			}
 	}
 	#if EQDEBUG >= 11
-	Log(Logs::General, Logs::None, "Client::CalcBaseMana() called for %s - returning %d", GetName(), max_m);
+	LogDebug("Client::CalcBaseMana() called for [{}] - returning [{}]", GetName(), max_m);
 	#endif
 	return max_m;
 }
@@ -694,8 +693,8 @@ int32 Client::CalcBaseManaRegen()
 	uint8 clevel = GetLevel();
 	int32 regen = 0;
 	if (IsSitting() || (GetHorseId() != 0)) {
-		if (HasSkill(EQEmu::skills::SkillMeditate)) {
-			regen = (((GetSkill(EQEmu::skills::SkillMeditate) / 10) + (clevel - (clevel / 4))) / 4) + 4;
+		if (HasSkill(EQ::skills::SkillMeditate)) {
+			regen = (((GetSkill(EQ::skills::SkillMeditate) / 10) + (clevel - (clevel / 4))) / 4) + 4;
 		}
 		else {
 			regen = 2;
@@ -721,7 +720,7 @@ int32 Client::CalcManaRegen(bool bCombat)
 			// kind of weird to do it here w/e
 			// client does some base medding regen for shrouds here
 			if (GetClass() != BARD) {
-				auto skill = GetSkill(EQEmu::skills::SkillMeditate);
+				auto skill = GetSkill(EQ::skills::SkillMeditate);
 				if (skill > 0) {
 					regen++;
 					if (skill > 1)
@@ -779,17 +778,17 @@ int32 Client::CalcManaRegen(bool bCombat)
 
 int32 Client::CalcManaRegenCap()
 {
-	int32 cap = RuleI(Character, ItemManaRegenCap) + aabonuses.ItemManaRegenCap;
+	int32 cap = RuleI(Character, ItemManaRegenCap) + aabonuses.ItemManaRegenCap + itembonuses.ItemManaRegenCap + spellbonuses.ItemManaRegenCap;
 	return (cap * RuleI(Character, ManaRegenMultiplier) / 100);
 }
 
 uint32 Client::CalcCurrentWeight()
 {
-	const EQEmu::ItemData* TempItem = nullptr;
-	EQEmu::ItemInstance* ins = nullptr;
+	const EQ::ItemData* TempItem = nullptr;
+	EQ::ItemInstance* ins = nullptr;
 	uint32 Total = 0;
 	int x;
-	for (x = EQEmu::invslot::POSSESSIONS_BEGIN; x <= EQEmu::invslot::POSSESSIONS_END; x++) {
+	for (x = EQ::invslot::POSSESSIONS_BEGIN; x <= EQ::invslot::POSSESSIONS_END; x++) {
 		TempItem = 0;
 		ins = GetInv().GetItem(x);
 		if (ins) {
@@ -799,7 +798,7 @@ uint32 Client::CalcCurrentWeight()
 			Total += TempItem->Weight;
 		}
 	}
-	for (x = EQEmu::invbag::GENERAL_BAGS_BEGIN; x <= EQEmu::invbag::CURSOR_BAG_END; x++) {
+	for (x = EQ::invbag::GENERAL_BAGS_BEGIN; x <= EQ::invbag::CURSOR_BAG_END; x++) {
 		int TmpWeight = 0;
 		TempItem = 0;
 		ins = GetInv().GetItem(x);
@@ -812,14 +811,14 @@ uint32 Client::CalcCurrentWeight()
 		if (TmpWeight > 0) {
 			// this code indicates that weight redux bags can only be in the first general inventory slot to be effective...
 			// is this correct? or can we scan for the highest weight redux and use that? (need client verifications)
-			int bagslot = EQEmu::invslot::slotGeneral1;
+			int bagslot = EQ::invslot::slotGeneral1;
 			int reduction = 0;
-			for (int m = EQEmu::invbag::GENERAL_BAGS_BEGIN + EQEmu::invbag::SLOT_COUNT; m <= EQEmu::invbag::CURSOR_BAG_END; m += EQEmu::invbag::SLOT_COUNT) {
+			for (int m = EQ::invbag::GENERAL_BAGS_BEGIN + EQ::invbag::SLOT_COUNT; m <= EQ::invbag::CURSOR_BAG_END; m += EQ::invbag::SLOT_COUNT) {
 				if (x >= m) {
 					bagslot += 1;
 				}
 			}
-			EQEmu::ItemInstance* baginst = GetInv().GetItem(bagslot);
+			EQ::ItemInstance* baginst = GetInv().GetItem(bagslot);
 			if (baginst && baginst->GetItem() && baginst->IsClassBag()) {
 				reduction = baginst->GetItem()->BagWR;
 			}
@@ -838,7 +837,7 @@ uint32 Client::CalcCurrentWeight()
 	    This is the ONLY instance I have seen where the client is hard coded to particular Item IDs to set a certain property for an item. It is very odd.
 	*/
 	// SoD+ client has no weight for coin
-	if (EQEmu::behavior::StaticLookup(EQEmu::versions::ConvertClientVersionToMobVersion(ClientVersion()))->CoinHasWeight) {
+	if (EQ::behavior::StaticLookup(EQ::versions::ConvertClientVersionToMobVersion(ClientVersion()))->CoinHasWeight) {
 		Total += (m_pp.platinum + m_pp.gold + m_pp.silver + m_pp.copper) / 4;
 	}
 	float Packrat = (float)spellbonuses.Packrat + (float)aabonuses.Packrat + (float)itembonuses.Packrat;
@@ -1051,8 +1050,13 @@ int Client::CalcHaste()
 		h = cap;
 	}
 	// 51+ 25 (despite there being higher spells...), 1-50 10
-	if (level >= 1) { // 51+
-		h += spellbonuses.hastetype3 > 25 ? 25 : spellbonuses.hastetype3;
+	if (level > 1) { // 51+
+		cap = RuleI(Character, Hastev3Cap);
+		if (spellbonuses.hastetype3 > cap) {
+			h += cap;
+		} else {
+			h += spellbonuses.hastetype3;
+		}
 	}
 	//else {   // 1-50
 	//	h += spellbonuses.hastetype3 > 10 ? 10 : spellbonuses.hastetype3;
@@ -1504,22 +1508,30 @@ int32 Client::CalcATK()
 	return (ATK);
 }
 
-uint32 Mob::GetInstrumentMod(uint16 spell_id) const
+uint32 Mob::GetInstrumentMod(uint16 spell_id)
 {
-	if (GetClass() != BARD || spells[spell_id].IsDisciplineBuff) // Puretone is Singing but doesn't get any mod
+	if (GetClass() != BARD) {
+		//Other classes can get a base effects mod using SPA 413
+		if (HasBaseEffectFocus()) {
+			return (10 + (GetFocusEffect(focusFcBaseEffects, spell_id) / 10));//TODO: change action->instrument mod to float to support < 10% focus values
+		}
 		return 10;
+	}
 
+	//AA's click effects that use instrument/singing skills don't apply modifiers (Confirmed on live 11/24/21 ~Kayen)
+	if (casting_spell_aa_id) {
+		return 10;
+	}
+		
 	uint32 effectmod = 10;
 	int effectmodcap = 0;
-	bool nocap = false;
 	if (RuleB(Character, UseSpellFileSongCap)) {
-		effectmodcap = spells[spell_id].songcap / 10;
-		// this looks a bit weird, but easiest way I could think to keep both systems working
-		if (effectmodcap == 0)
-			nocap = true;
-		else
-			effectmodcap += 10;
-	} else {
+		effectmodcap = spells[spell_id].song_cap / 10;
+		if (effectmodcap) {
+			effectmodcap += 10; //Actual calculated cap is 100 greater than songcap value.
+		}
+	}
+	else {
 		effectmodcap = RuleI(Character, BaseInstrumentSoftCap);
 	}
 	// this should never use spell modifiers...
@@ -1528,11 +1540,44 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id) const
 	// item mods are in 10ths of percent increases
 	// clickies (Symphony of Battle) that have a song skill don't get AA bonus for some reason
 	// but clickies that are songs (selo's on Composers Greaves) do get AA mod as well
+
+	/*Mechanics: updated 10/19/21 ~Kayen
+		Bard Spell Effects
+
+		Mod uses the highest bonus from either of these for each instrument
+		SPA 179 SE_AllInstrumentMod is used for instrument spellbonus.______Mod. This applies to ALL instrument mods (Puretones Discipline)
+		SPA 260 SE_AddSingingMod is used for instrument spellbonus.______Mod. This applies to indiviual instrument mods. (Instrument mastery AA)
+			-Example usage: From AA a value of 4 = 40%
+
+		SPA 118 SE_Amplification is a stackable singing mod, on live it exists as both spell and AA bonus (stackable)
+			- Live Behavior: Amplifcation can be modified by singing mods and amplification itself, thus on the second cast of Amplification you will recieve
+			  the mod from the first cast, this continues until you reach the song mod cap.
+
+		SPA 261 SE_SongModCap raises song focus cap (No longer used on live)
+		SPA 270 SE_BardSongRange increase range of beneficial bard songs (Sionachie's Crescendo)
+
+		SPA 413 SE_FcBaseEffects focus effect that replaced item instrument mods
+
+		Issues 10-15-21:
+		Bonuses are not applied, unless song is stopped and restarted due to pulse keeping it continues. -> Need to recode songs to recast when duration ends.
+
+		Formula Live Bards:
+		mod = (10 + (aabonus.____Mod [SPA 260 AA Instrument Mastery]) + (SE_FcBaseEffect[SPA 413])/10 + (spellbonus.______Mod [SPA 179 Puretone Disc]) + (Amplication [SPA 118])/10
+
+		TODO: Spell Table Fields that need to be implemented
+		Field 225	//float base_effects_focus_slope;  // -- BASE_EFFECTS_FOCUS_SLOPE
+		Field 226	//float base_effects_focus_offset; // -- BASE_EFFECTS_FOCUS_OFFSET (35161	Ruaabri's Reckless Renewal -120)
+		Based on description possibly works as a way to quickly balance instrument mods to a song.
+		Using a standard slope formula: y = mx + b
+		modified_base_value = (base_effects_focus_slope x effectmod)(base_value) + (base_effects_focus_offset)
+		Will need to confirm on live before implementing.
+	*/
+
 	switch (spells[spell_id].skill) {
-	case EQEmu::skills::SkillPercussionInstruments:
+	case EQ::skills::SkillPercussionInstruments:
 		if (itembonuses.percussionMod == 0 && spellbonuses.percussionMod == 0)
 			effectmod = 10;
-		else if (GetSkill(EQEmu::skills::SkillPercussionInstruments) == 0)
+		else if (GetSkill(EQ::skills::SkillPercussionInstruments) == 0)
 			effectmod = 10;
 		else if (itembonuses.percussionMod > spellbonuses.percussionMod)
 			effectmod = itembonuses.percussionMod;
@@ -1541,10 +1586,10 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id) const
 		if (IsBardSong(spell_id))
 			effectmod += aabonuses.percussionMod;
 		break;
-	case EQEmu::skills::SkillStringedInstruments:
+	case EQ::skills::SkillStringedInstruments:
 		if (itembonuses.stringedMod == 0 && spellbonuses.stringedMod == 0)
 			effectmod = 10;
-		else if (GetSkill(EQEmu::skills::SkillStringedInstruments) == 0)
+		else if (GetSkill(EQ::skills::SkillStringedInstruments) == 0)
 			effectmod = 10;
 		else if (itembonuses.stringedMod > spellbonuses.stringedMod)
 			effectmod = itembonuses.stringedMod;
@@ -1553,10 +1598,10 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id) const
 		if (IsBardSong(spell_id))
 			effectmod += aabonuses.stringedMod;
 		break;
-	case EQEmu::skills::SkillWindInstruments:
+	case EQ::skills::SkillWindInstruments:
 		if (itembonuses.windMod == 0 && spellbonuses.windMod == 0)
 			effectmod = 10;
-		else if (GetSkill(EQEmu::skills::SkillWindInstruments) == 0)
+		else if (GetSkill(EQ::skills::SkillWindInstruments) == 0)
 			effectmod = 10;
 		else if (itembonuses.windMod > spellbonuses.windMod)
 			effectmod = itembonuses.windMod;
@@ -1565,10 +1610,10 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id) const
 		if (IsBardSong(spell_id))
 			effectmod += aabonuses.windMod;
 		break;
-	case EQEmu::skills::SkillBrassInstruments:
+	case EQ::skills::SkillBrassInstruments:
 		if (itembonuses.brassMod == 0 && spellbonuses.brassMod == 0)
 			effectmod = 10;
-		else if (GetSkill(EQEmu::skills::SkillBrassInstruments) == 0)
+		else if (GetSkill(EQ::skills::SkillBrassInstruments) == 0)
 			effectmod = 10;
 		else if (itembonuses.brassMod > spellbonuses.brassMod)
 			effectmod = itembonuses.brassMod;
@@ -1577,7 +1622,7 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id) const
 		if (IsBardSong(spell_id))
 			effectmod += aabonuses.brassMod;
 		break;
-	case EQEmu::skills::SkillSinging:
+	case EQ::skills::SkillSinging:
 		if (itembonuses.singingMod == 0 && spellbonuses.singingMod == 0)
 			effectmod = 10;
 		else if (itembonuses.singingMod > spellbonuses.singingMod)
@@ -1585,20 +1630,37 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id) const
 		else
 			effectmod = spellbonuses.singingMod;
 		if (IsBardSong(spell_id))
-			effectmod += aabonuses.singingMod + spellbonuses.Amplification;
+			effectmod += aabonuses.singingMod + (spellbonuses.Amplification + itembonuses.Amplification + aabonuses.Amplification); //SPA 118 SE_Amplification
 		break;
 	default:
 		effectmod = 10;
 		return effectmod;
 	}
-	if (!RuleB(Character, UseSpellFileSongCap))
-		effectmodcap += aabonuses.songModCap + spellbonuses.songModCap + itembonuses.songModCap;
-	if (effectmod < 10)
+
+	if (HasBaseEffectFocus()) {
+		effectmod += (GetFocusEffect(focusFcBaseEffects, spell_id) / 10);
+	}
+
+	if (effectmod < 10) {
 		effectmod = 10;
-	if (!nocap && effectmod > effectmodcap) // if the cap is calculated to be 0 using new rules, no cap.
-		effectmod = effectmodcap;
-	Log(Logs::Detail, Logs::Spells, "%s::GetInstrumentMod() spell=%d mod=%d modcap=%d\n", GetName(), spell_id,
-		effectmod, effectmodcap);
+	}
+
+	if (effectmodcap) {
+
+		effectmodcap += aabonuses.songModCap + spellbonuses.songModCap + itembonuses.songModCap; //SPA 261 SE_SongModCap (not used on live)
+
+		//Incase a negative modifier is used.
+		if (effectmodcap <= 0) {
+			effectmodcap = 10;
+		}
+
+		if (effectmod > effectmodcap) { // if the cap is calculated to be 0 using new rules, no cap.
+			effectmod = effectmodcap;
+		}
+	}
+
+	LogSpells("[{}]::GetInstrumentMod() spell=[{}] mod=[{}] modcap=[{}]\n", GetName(), spell_id, effectmod, effectmodcap);
+
 	return effectmod;
 }
 
@@ -1611,10 +1673,10 @@ void Client::CalcMaxEndurance()
 	if (current_endurance > max_end) {
 		current_endurance = max_end;
 	}
-	int end_perc_cap = spellbonuses.EndPercCap[0];
+	int end_perc_cap = spellbonuses.EndPercCap[SBIndex::RESOURCE_PERCENT_CAP];
 	if (end_perc_cap) {
 		int curEnd_cap = (max_end * end_perc_cap) / 100;
-		if (current_endurance > curEnd_cap || (spellbonuses.EndPercCap[1] && current_endurance > spellbonuses.EndPercCap[1])) {
+		if (current_endurance > curEnd_cap || (spellbonuses.EndPercCap[SBIndex::RESOURCE_AMOUNT_CAP] && current_endurance > spellbonuses.EndPercCap[SBIndex::RESOURCE_AMOUNT_CAP])) {
 			current_endurance = curEnd_cap;
 		}
 	}
@@ -1623,7 +1685,7 @@ void Client::CalcMaxEndurance()
 int32 Client::CalcBaseEndurance()
 {
 	int32 base_end = 0;
-	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+	if (ClientVersion() >= EQ::versions::ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
 		double heroic_stats = (GetHeroicSTR() + GetHeroicSTA() + GetHeroicDEX() + GetHeroicAGI()) / 4.0f;
 		double stats = (GetSTR() + GetSTA() + GetDEX() + GetAGI()) / 4.0f;
 		if (stats > 201.0f) {
@@ -1748,7 +1810,7 @@ int32 Client::CalcEnduranceRegen(bool bCombat)
 
 int32 Client::CalcEnduranceRegenCap()
 {
-	int cap = RuleI(Character, ItemEnduranceRegenCap);
+	int cap = RuleI(Character, ItemEnduranceRegenCap) + aabonuses.ItemEnduranceRegenCap + itembonuses.ItemEnduranceRegenCap + spellbonuses.ItemEnduranceRegenCap;
 	return (cap * RuleI(Character, EnduranceRegenMultiplier) / 100);
 }
 
@@ -1762,12 +1824,12 @@ int Client::GetRawACNoShield(int &shield_ac) const
 {
 	int ac = itembonuses.AC + spellbonuses.AC + aabonuses.AC;
 	shield_ac = 0;
-	const EQEmu::ItemInstance *inst = m_inv.GetItem(EQEmu::invslot::slotSecondary);
+	const EQ::ItemInstance *inst = m_inv.GetItem(EQ::invslot::slotSecondary);
 	if (inst) {
-		if (inst->GetItem()->ItemType == EQEmu::item::ItemTypeShield) {
+		if (inst->GetItem()->ItemType == EQ::item::ItemTypeShield) {
 			ac -= inst->GetItem()->AC;
 			shield_ac = inst->GetItem()->AC;
-			for (uint8 i = EQEmu::invaug::SOCKET_BEGIN; i <= EQEmu::invaug::SOCKET_END; i++) {
+			for (uint8 i = EQ::invaug::SOCKET_BEGIN; i <= EQ::invaug::SOCKET_END; i++) {
 				if (inst->GetAugment(i)) {
 					ac -= inst->GetAugment(i)->GetItem()->AC;
 					shield_ac += inst->GetAugment(i)->GetItem()->AC;

@@ -36,7 +36,7 @@ Horse::Horse(Client *_owner, uint16 spell_id, const glm::vec4& position)
 	strn0cpy(name, _owner->GetCleanName(), 55);
 	strcat(name,"`s_Mount00");
 
-	IsHorse = true;
+	is_horse = true;
 
 	owner = _owner;
 }
@@ -73,14 +73,14 @@ const NPCType *Horse::BuildHorseType(uint16 spell_id) {
 	const char* fileName = spells[spell_id].teleport_zone;
 
 	std::string query = StringFormat("SELECT race, gender, texture, mountspeed FROM horses WHERE filename = '%s'", fileName);
-	auto results = database.QueryDatabase(query);
+	auto results = content_db.QueryDatabase(query);
 	if (!results.Success()) {
 		return nullptr;
 	}
 
 	if (results.RowCount() != 1) {
-        Log(Logs::General, Logs::Error, "No Database entry for mount: %s, check the horses table", fileName);
-        return nullptr;
+		LogError("No Database entry for mount: [{}], check the horses table", fileName);
+		return nullptr;
 	}
 
     auto row = results.begin();
@@ -118,11 +118,11 @@ const NPCType *Horse::BuildHorseType(uint16 spell_id) {
 
 void Client::SummonHorse(uint16 spell_id) {
 	if (GetHorseId() != 0) {
-		Message(13,"You already have a Horse. Get off, Fatbutt!");
+		Message(Chat::Red,"You already have a Horse. Get off, Fatbutt!");
 		return;
 	}
 	if(!Horse::IsHorseSpell(spell_id)) {
-		Log(Logs::General, Logs::Error, "%s tried to summon an unknown horse, spell id %d", GetName(), spell_id);
+		LogError("[{}] tried to summon an unknown horse, spell id [{}]", GetName(), spell_id);
 		return;
 	}
 

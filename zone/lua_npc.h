@@ -8,12 +8,14 @@ class NPC;
 class Lua_Mob;
 class Lua_NPC;
 class Lua_Client;
+struct Lua_NPC_Loot_List;
 
 namespace luabind {
 	struct scope;
 }
 
 luabind::scope lua_register_npc();
+luabind::scope lua_register_npc_loot_list();
 
 class Lua_NPC : public Lua_Mob
 {
@@ -73,6 +75,7 @@ public:
 	void SetPetSpellID(int id);
 	uint32 GetMaxDamage(int level);
 	void SetTaunting(bool t);
+	bool IsTaunting();
 	void PickPocket(Lua_Client thief);
 	void StartSwarmTimer(uint32 duration);
 	void DoClassAttacks(Lua_Mob target);
@@ -131,6 +134,21 @@ public:
 	void MerchantCloseShop();
 	int GetRawAC();
 	int GetAvoidanceRating();
+	void SetSimpleRoamBox(float box_size);
+	void SetSimpleRoamBox(float box_size, float move_distance);
+	void SetSimpleRoamBox(float box_size, float move_distance, int move_delay);
+	void RecalculateSkills();
+	void ScaleNPC(uint8 npc_level);
+	bool IsRaidTarget();
+	void ChangeLastName(const char *lastname);
+	void ClearLastName();
+	bool HasItem(uint32 item_id);
+	uint16 CountItem(uint32 item_id);
+	uint32 GetItemIDBySlot(uint16 slot_id);
+	uint16 GetFirstSlotByItemID(uint32 item_id);
+	float GetHealScale();
+	float GetSpellScale();
+	Lua_NPC_Loot_List GetLootList(lua_State* L);
 };
 
 #endif

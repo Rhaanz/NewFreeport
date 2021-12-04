@@ -101,6 +101,15 @@
 	void Handle_OP_DuelResponse2(const EQApplicationPacket *app);
 	void Handle_OP_DumpName(const EQApplicationPacket *app);
 	void Handle_OP_Dye(const EQApplicationPacket *app);
+	void Handle_OP_DzAddPlayer(const EQApplicationPacket *app);
+	void Handle_OP_DzChooseZoneReply(const EQApplicationPacket *app);
+	void Handle_OP_DzExpeditionInviteResponse(const EQApplicationPacket *app);
+	void Handle_OP_DzListTimers(const EQApplicationPacket *app);
+	void Handle_OP_DzMakeLeader(const EQApplicationPacket *app);
+	void Handle_OP_DzPlayerList(const EQApplicationPacket *app);
+	void Handle_OP_DzRemovePlayer(const EQApplicationPacket *app);
+	void Handle_OP_DzSwapPlayer(const EQApplicationPacket *app);
+	void Handle_OP_DzQuit(const EQApplicationPacket *app);
 	void Handle_OP_Emote(const EQApplicationPacket *app);
 	void Handle_OP_EndLootRequest(const EQApplicationPacket *app);
 	void Handle_OP_EnvDamage(const EQApplicationPacket *app);
@@ -174,6 +183,7 @@
 	void Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app);
 	void Handle_OP_Jump(const EQApplicationPacket *app);
 	void Handle_OP_KeyRing(const EQApplicationPacket *app);
+	void Handle_OP_KickPlayers(const EQApplicationPacket *app);
 	void Handle_OP_LDoNButton(const EQApplicationPacket *app);
 	void Handle_OP_LDoNDisarmTraps(const EQApplicationPacket *app);
 	void Handle_OP_LDoNInspect(const EQApplicationPacket *app);
@@ -272,6 +282,7 @@
 	void Handle_OP_TargetCommand(const EQApplicationPacket *app);
 	void Handle_OP_TargetMouse(const EQApplicationPacket *app);
 	void Handle_OP_TaskHistoryRequest(const EQApplicationPacket *app);
+	void Handle_OP_TaskTimers(const EQApplicationPacket *app);
 	void Handle_OP_Taunt(const EQApplicationPacket *app);
 	void Handle_OP_TestBuff(const EQApplicationPacket *app);
 	void Handle_OP_TGB(const EQApplicationPacket *app);
@@ -303,3 +314,14 @@
 	void Handle_OP_YellForHelp(const EQApplicationPacket *app);
 	void Handle_OP_ZoneChange(const EQApplicationPacket *app);
 	void Handle_OP_ResetAA(const EQApplicationPacket *app);
+	void Handle_OP_MovementHistoryList(const EQApplicationPacket* app);
+	void Handle_OP_UnderWorld(const EQApplicationPacket* app);
+
+	// shared tasks
+	void Handle_OP_SharedTaskRemovePlayer(const EQApplicationPacket *app);
+	void Handle_OP_SharedTaskAddPlayer(const EQApplicationPacket *app);
+	void Handle_OP_SharedTaskMakeLeader(const EQApplicationPacket *app);
+	void Handle_OP_SharedTaskInviteResponse(const EQApplicationPacket *app);
+	void Handle_OP_SharedTaskAccept(const EQApplicationPacket *app);
+	void Handle_OP_SharedTaskQuit(const EQApplicationPacket *app);
+	void Handle_OP_SharedTaskPlayerList(const EQApplicationPacket *app);

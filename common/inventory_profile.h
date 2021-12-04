@@ -52,30 +52,30 @@ public:
 	// Public Methods
 	/////////////////////////
 
-	inline std::list<EQEmu::ItemInstance*>::const_iterator cbegin() { return m_list.cbegin(); }
-	inline std::list<EQEmu::ItemInstance*>::const_iterator cend() { return m_list.cend(); }
+	inline std::list<EQ::ItemInstance*>::const_iterator cbegin() { return m_list.cbegin(); }
+	inline std::list<EQ::ItemInstance*>::const_iterator cend() { return m_list.cend(); }
 
 	inline int size() { return static_cast<int>(m_list.size()); } // TODO: change to size_t
 	inline bool empty() { return m_list.empty(); }
 
-	void push(EQEmu::ItemInstance* inst);
-	void push_front(EQEmu::ItemInstance* inst);
-	EQEmu::ItemInstance* pop();
-	EQEmu::ItemInstance* pop_back();
-	EQEmu::ItemInstance* peek_front() const;
+	void push(EQ::ItemInstance* inst);
+	void push_front(EQ::ItemInstance* inst);
+	EQ::ItemInstance* pop();
+	EQ::ItemInstance* pop_back();
+	EQ::ItemInstance* peek_front() const;
 
 protected:
 	/////////////////////////
 	// Protected Members
 	/////////////////////////
 
-	std::list<EQEmu::ItemInstance*> m_list;
+	std::list<EQ::ItemInstance*> m_list;
 };
 
 // ########################################
-// Class: EQEmu::InventoryProfile
+// Class: EQ::InventoryProfile
 //	Character inventory
-namespace EQEmu
+namespace EQ
 {
 	class InventoryProfile
 	{
@@ -132,7 +132,7 @@ namespace EQEmu
 		bool SwapItem(int16 source_slot, int16 destination_slot, SwapItemFailState& fail_state, uint16 race_id = 0, uint8 class_id = 0, uint16 deity_id = 0, uint8 level = 0);
 
 		// Remove item from inventory
-		bool DeleteItem(int16 slot_id, uint8 quantity = 0);
+		bool DeleteItem(int16 slot_id, int16 quantity = 0);
 
 		// Checks All items in a bag for No Drop
 		bool CheckNoDrop(int16 slot_id, bool recurse = true);
@@ -190,6 +190,7 @@ namespace EQEmu
 		void SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, float value);
 		void SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, bool value);
 		std::string GetCustomItemData(int16 slot_id, std::string identifier);
+		static int GetItemStatValue(uint32 item_id, const char* identifier);
 	protected:
 		///////////////////////////////
 		// Protected Methods

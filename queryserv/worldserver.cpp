@@ -52,7 +52,7 @@ WorldServer::~WorldServer()
 
 void WorldServer::Connect()
 {
-	m_connection.reset(new EQ::Net::ServertalkClient(Config->WorldIP, Config->WorldTCPPort, false, "QueryServ", Config->SharedKey));
+	m_connection = std::make_unique<EQ::Net::ServertalkClient>(Config->WorldIP, Config->WorldTCPPort, false, "QueryServ", Config->SharedKey);
 	m_connection->OnMessage(std::bind(&WorldServer::HandleMessage, this, std::placeholders::_1, std::placeholders::_2));
 }
 
@@ -168,7 +168,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			break;
 		}
 		default:
-			Log(Logs::Detail, Logs::QS_Server, "Received unhandled ServerOP_QueryServGeneric", Type);
+			LogInfo("Received unhandled ServerOP_QueryServGeneric", Type);
 			break;
 		}
 		break;

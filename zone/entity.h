@@ -49,6 +49,7 @@ class Raid;
 class Spawn2;
 class Trap;
 
+struct DynamicZoneSafeReturn;
 struct GuildBankItemUpdate_Struct;
 struct NewSpawn_Struct;
 struct QGlobal;
@@ -157,7 +158,8 @@ public:
 	Mob *GetMob(const char* name);
 	Mob *GetMobByNpcTypeID(uint32 get_id);
 	bool IsMobSpawnedByNpcTypeID(uint32 get_id);
-	Mob *GetTargetForVirus(Mob* spreader, int range);
+	bool IsNPCSpawned(std::vector<uint32> npc_ids);
+	uint32 CountSpawnedNPCs(std::vector<uint32> npc_ids);
 	inline NPC *GetNPCByID(uint16 id)
 	{
 		auto it = npc_list.find(id);
@@ -166,6 +168,7 @@ public:
 		return nullptr;
 	}
 	NPC *GetNPCByNPCTypeID(uint32 npc_id);
+	NPC *GetNPCBySpawnID(uint32 spawn_id);
 	inline Merc *GetMercByID(uint16 id)
 	{
 		auto it = merc_list.find(id);
@@ -232,6 +235,7 @@ public:
 	void RemoveAllCorpsesByCharID(uint32 charid);
 	void RemoveCorpseByDBID(uint32 dbid);
 	int RezzAllCorpsesByCharID(uint32 charid);
+	void DespawnGridNodes(int32 grid_id);
 	bool IsMobInZone(Mob *who);
 	void ClearClientPetitionQueue();
 	bool CanAddHateForMob(Mob *p);
@@ -387,20 +391,20 @@ public:
 	void	ReplaceWithTarget(Mob* pOldMob, Mob*pNewTarget);
 	void	QueueCloseClients(Mob* sender, const EQApplicationPacket* app, bool ignore_sender=false, float distance=200, Mob* skipped_mob = 0, bool is_ack_required = true, eqFilterType filter=FilterNone);
 	void	QueueClients(Mob* sender, const EQApplicationPacket* app, bool ignore_sender=false, bool ackreq = true);
-	void	QueueClientsStatus(Mob* sender, const EQApplicationPacket* app, bool ignore_sender = false, uint8 minstatus = 0, uint8 maxstatus = 0);
+	void	QueueClientsStatus(Mob* sender, const EQApplicationPacket* app, bool ignore_sender = false, uint8 minstatus = AccountStatus::Player, uint8 maxstatus = AccountStatus::Player);
 	void	QueueClientsGuild(Mob* sender, const EQApplicationPacket* app, bool ignore_sender = false, uint32 guildeqid = 0);
 	void	QueueClientsGuildBankItemUpdate(const GuildBankItemUpdate_Struct *gbius, uint32 GuildID);
 	void	QueueClientsByTarget(Mob* sender, const EQApplicationPacket* app, bool iSendToSender = true, Mob* SkipThisMob = 0, bool ackreq = true,
 						bool HoTT = true, uint32 ClientVersionBits = 0xFFFFFFFF, bool inspect_buffs = false);
 
-	void	QueueClientsByXTarget(Mob* sender, const EQApplicationPacket* app, bool iSendToSender = true, EQEmu::versions::ClientVersionBitmask client_version_bits = EQEmu::versions::ClientVersionBitmask::maskAllClients);
+	void	QueueClientsByXTarget(Mob* sender, const EQApplicationPacket* app, bool iSendToSender = true, EQ::versions::ClientVersionBitmask client_version_bits = EQ::versions::ClientVersionBitmask::maskAllClients);
 	void	QueueToGroupsForNPCHealthAA(Mob* sender, const EQApplicationPacket* app);
 	void	QueueManaged(Mob* sender, const EQApplicationPacket* app, bool ignore_sender=false, bool ackreq = true);
 
 	void AEAttack(
 		Mob *attacker,
 		float distance,
-		int Hand = EQEmu::invslot::slotPrimary,
+		int Hand = EQ::invslot::slotPrimary,
 		int count = 0,
 		bool is_from_spell = false
 	);
@@ -436,8 +440,8 @@ public:
 
 	void	ListNPCCorpses(Client* client);
 	void	ListPlayerCorpses(Client* client);
-	int32	DeleteNPCCorpses();
-	int32	DeletePlayerCorpses();
+	uint32	DeleteNPCCorpses();
+	uint32	DeletePlayerCorpses();
 	void	CorpseFix(Client* c);
 	void	WriteEntityIDs();
 	void	HalveAggro(Mob* who);
@@ -447,6 +451,7 @@ public:
 
 	void	Process();
 	void	ClearAggro(Mob* targ);
+	void    ClearWaterAggro(Mob* targ);
 	void	ClearFeignAggro(Mob* targ);
 	void	ClearZoneFeignAggro(Client* targ);
 	void	AggroZone(Mob* who, uint32 hate = 0);
@@ -473,13 +478,13 @@ public:
 	Corpse* GetClosestCorpse(Mob* sender, const char *Name);
 	NPC* GetClosestBanker(Mob* sender, uint32 &distance);
 	void	CameraEffect(uint32 duration, uint32 intensity);
-	Mob*	GetClosestMobByBodyType(Mob* sender, bodyType BodyType);
+	Mob*	GetClosestMobByBodyType(Mob* sender, bodyType BodyType, bool skip_client_pets=false);
 	void	ForceGroupUpdate(uint32 gid);
 	void	SendGroupLeave(uint32 gid, const char *name);
 	void	SendGroupJoin(uint32 gid, const char *name);
 
 	void	SaveAllClientsTaskState();
-	void	ReloadAllClientsTaskState(int TaskID=0);
+	void	ReloadAllClientsTaskState(int task_id=0);
 	uint16	CreateGroundObject(uint32 itemid, const glm::vec4& position, uint32 decay_time = 300000);
 	uint16	CreateGroundObjectFromModel(const char *model, const glm::vec4& position, uint8 type = 0x00, uint32 decay_time = 0);
 	uint16	CreateDoor(const char *model, const glm::vec4& position, uint8 type = 0, uint16 size = 100);
@@ -494,6 +499,8 @@ public:
 	void	UpdateFindableNPCState(NPC *n, bool Remove);
 	void	HideCorpses(Client *c, uint8 CurrentMode, uint8 NewMode);
 
+	void GateAllClientsToSafeReturn();
+
 	uint16 GetClientCount();
 	void GetMobList(std::list<Mob*> &m_list);
 	void GetNPCList(std::list<NPC*> &n_list);
@@ -504,11 +511,15 @@ public:
 	void GetDoorsList(std::list<Doors*> &d_list);
 	void GetSpawnList(std::list<Spawn2*> &d_list);
 	void GetTargetsForConeArea(Mob *start, float min_radius, float radius, float height, int pcnpc, std::list<Mob*> &m_list);
+	std::vector<Mob*> GetTargetsForVirusEffect(Mob *spreader, Mob *orginal_caster, int range, int pcnpc, int32 spell_id);
 
 	inline const std::unordered_map<uint16, Mob *> &GetMobList() { return mob_list; }
 	inline const std::unordered_map<uint16, NPC *> &GetNPCList() { return npc_list; }
 	inline const std::unordered_map<uint16, Merc *> &GetMercList() { return merc_list; }
 	inline const std::unordered_map<uint16, Client *> &GetClientList() { return client_list; }
+#ifdef BOTS
+	inline const std::list<Bot *> &GetBotList() { return bot_list; }
+#endif
 	inline const std::unordered_map<uint16, Corpse *> &GetCorpseList() { return corpse_list; }
 	inline const std::unordered_map<uint16, Object *> &GetObjectList() { return object_list; }
 	inline const std::unordered_map<uint16, Doors *> &GetDoorsList() { return door_list; }
@@ -521,12 +532,18 @@ public:
 	void RefreshAutoXTargets(Client *c);
 	void RefreshClientXTargets(Client *c);
 	void SendAlternateAdvancementStats();
-	void ScanCloseMobs(std::unordered_map<uint16, Mob *> &close_mobs, Mob *scanning_mob);
+	void ScanCloseMobs(
+		std::unordered_map<uint16, Mob *> &close_mobs,
+		Mob *scanning_mob,
+		bool add_self_to_other_lists = false
+	);
 
 	void GetTrapInfo(Client* client);
 	bool IsTrapGroupSpawned(uint32 trap_id, uint8 group);
 	void UpdateAllTraps(bool respawn, bool repopnow = false);
 	void ClearTrapPointers();
+
+	int MovePlayerCorpsesToGraveyard(bool force_move_from_instance = false);
 
 protected:
 	friend class Zone;
@@ -580,8 +597,10 @@ private:
 
 		bool Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, float iRange, uint32 iSpellTypes); // TODO: Evaluate this closesly in hopes to eliminate
 		void ShowSpawnWindow(Client* client, int Distance, bool NamedOnly); // TODO: Implement ShowSpawnWindow in the bot class but it needs entity list stuff
-	
+
 		void ScanCloseClientMobs(std::unordered_map<uint16, Mob*>& close_mobs, Mob* scanning_mob);
+
+		void GetBotList(std::list<Bot*> &b_list);
 	private:
 		std::list<Bot*> bot_list;
 #endif

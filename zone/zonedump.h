@@ -44,7 +44,7 @@ struct NPCType
 	uint16	race;
 	uint8	class_;
 	uint8	bodytype;	// added for targettype support
-	uint8	deity;		//not loaded from DB
+	uint32	deity;		//not loaded from DB
 	uint8	level;
 	uint32	npc_id;
 	uint8	texture;
@@ -86,7 +86,7 @@ struct NPCType
 	uint32	drakkin_heritage;
 	uint32	drakkin_tattoo;
 	uint32	drakkin_details;
-	EQEmu::TintProfile	armor_tint;
+	EQ::TintProfile	armor_tint;
 	uint32	min_dmg;
 	uint32	max_dmg;
 	uint32	charm_ac;
@@ -143,8 +143,12 @@ struct NPCType
 	bool	untargetable;
 	bool	skip_global_loot;
 	bool	rare_spawn;
+	bool	skip_auto_scale; // just so it doesn't mess up bots or mercs, probably should add to DB too just in case
 	int8	stuck_behavior;
 	uint16	use_model;
+	int8	flymode;
+	bool	always_aggro;
+	int     exp_mod;
 };
 
 namespace player_lootitem {
@@ -182,7 +186,7 @@ struct PlayerCorpse_Struct {
 	uint32	silver;
 	uint32	gold;
 	uint32	plat;
-	EQEmu::TintProfile item_tint;
+	EQ::TintProfile item_tint;
 	uint8 haircolor;
 	uint8 beardcolor;
 	uint8 eyecolor1;
@@ -195,37 +199,6 @@ struct PlayerCorpse_Struct {
 	uint32 drakkin_details;
 	player_lootitem::ServerLootItem_Struct	items[0];
 	//std::list<player_lootitem::ServerLootItem_Struct*> items;
-};
-
-struct Door {
-	uint32	db_id;
-	uint8	door_id;
-	char	zone_name[32];
-	char	door_name[32];
-	float	pos_x;
-	float	pos_y;
-	float	pos_z;
-	float	heading;
-	int		incline;
-	uint8	opentype;
-	uint32	guild_id;
-	uint16	lock_pick;
-	uint32	keyitem;
-	uint8	nokeyring;
-	uint8	trigger_door;
-	uint8	trigger_type;
-	uint8	disable_timer;
-	uint32	door_param;
-	int		invert_state;
-	uint16	size;
-	char	dest_zone[16];
-	uint32	dest_instance_id;
-	float	dest_x;
-	float	dest_y;
-	float	dest_z;
-	float	dest_heading;
-	uint8	is_ldon_door;
-	uint32	client_version_mask;
 };
 
 #pragma pack()

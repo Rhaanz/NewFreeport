@@ -22,12 +22,13 @@
 
 #include "eq_limits.h"
 #include "emu_versions.h"
+#include "bodytypes.h"
 
 #include <string.h>
 
 
 // local definitions are the result of using hybrid-client or server-only values and methods
-namespace EQEmu
+namespace EQ
 {
 	using RoF2::IINVALID;
 	using RoF2::INULL;
@@ -76,6 +77,10 @@ namespace EQEmu
 		using RoF2::invtype::GetInvTypeName;
 
 	} // namespace invtype
+
+	namespace DevTools {
+		const int32 GM_ACCOUNT_STATUS_LEVEL = 150;
+	}
 
 	namespace popupresponse {
 		const int32 SERVER_INTERNAL_USE_BASE = 2000000000;
@@ -189,7 +194,7 @@ namespace EQEmu
 	} // namespace invaug
 
 	namespace constants {
-		const EQEmu::versions::ClientVersion CHARACTER_CREATION_CLIENT = EQEmu::versions::ClientVersion::Titanium;
+		const EQ::versions::ClientVersion CHARACTER_CREATION_CLIENT = EQ::versions::ClientVersion::Titanium;
 
 		using RoF2::constants::EXPANSION;
 		using RoF2::constants::EXPANSION_BIT;
@@ -216,8 +221,29 @@ namespace EQEmu
 			stanceBurnAE
 		};
 
+		enum GravityBehavior : uint8 {
+			Ground,
+			Flying,
+			Levitating,
+			Water,
+			Floating,
+			LevitateWhileRunning
+		};
+
 		const char *GetStanceName(StanceType stance_type);
 		int ConvertStanceTypeToIndex(StanceType stance_type);
+
+		extern const std::map<int, std::string>& GetLanguageMap();
+		std::string GetLanguageName(int language_id);
+
+		extern const std::map<uint32, std::string>& GetLDoNThemeMap();
+		std::string GetLDoNThemeName(uint32 theme_id);
+    
+		extern const std::map<uint8, std::string>& GetFlyModeMap();
+		std::string GetFlyModeName(uint8 flymode_id);
+
+		extern const std::map<bodyType, std::string>& GetBodyTypeMap();
+		std::string GetBodyTypeName(bodyType bodytype_id);
 
 		const int STANCE_TYPE_FIRST = stancePassive;
 		const int STANCE_TYPE_LAST = stanceBurnAE;
@@ -313,12 +339,46 @@ namespace EQEmu
 		QuestControlGrid = -1
 	};
 
+	namespace consent {
+		enum eConsentType : uint8 {
+			Normal = 0,
+			Group,
+			Raid,
+			Guild
+		};
+	}; // namespace consent
 } /*EQEmu*/
 
+enum ServerLockType : int {
+	List,
+	Lock,
+	Unlock
+};
+
+enum AccountStatus : uint8 {
+	Player = 0,
+	Steward = 10,
+	ApprenticeGuide = 20,
+	Guide = 50,
+	QuestTroupe = 80,
+	SeniorGuide = 81,
+	GMTester = 85,
+	EQSupport = 90,
+	GMStaff = 95,
+	GMAdmin = 100,
+	GMLeadAdmin = 150,
+	QuestMaster = 160,
+	GMAreas = 170,
+	GMCoder = 180,
+	GMMgmt = 200,
+	GMImpossible = 250,
+	Max = 255
+};
+
+enum Invisibility : uint8 {
+	Visible,
+	Invisible,
+	Special = 255
+};
+
 #endif /*COMMON_EMU_CONSTANTS_H*/
-
-/*	hack list to prevent circular references
-	
-	eq_limits.h:EQEmu::inventory::LookupEntry::InventoryTypeSize[n];
-
-*/
