@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-
+//Maze Was Here
 #include "../common/global_define.h"
 #include "../common/eq_constants.h"
 #include "../common/eq_packet_structs.h"
@@ -333,7 +333,7 @@ bool Mob::AvoidDamage(Mob *other, DamageHitInfo &hit)
 	*
 	* special return values:
 	* -1 - block
-	* -2 - parry
+	* -2 - parryake 
 	* -3 - riposte
 	* -4 - dodge
 	*
@@ -5337,9 +5337,12 @@ void Client::DoAttackRounds(Mob *target, int hand, bool IsFromSpell)
 			}
 
 			// you can only triple from the main hand
-			if (hand == EQEmu::invslot::slotPrimary && CanThisClassTripleAttack()) {
-				CheckIncreaseSkill(EQEmu::skills::SkillTripleAttack, target, -10);
-				if (CheckTripleAttack()) {
+			//if (hand == EQEmu::invslot::slotPrimary && CanThisClassTripleAttack()) {
+			if (hand == EQEmu::invslot::slotPrimary && CanThisClassDoubleAttack()) {
+				CheckIncreaseSkill(EQEmu::skills::SkillDoubleAttack, target, -10);
+				//CheckIncreaseSkill(EQEmu::skills::SkillTripleAttack, target, -10);
+				//if (CheckTripleAttack()) {
+					if (CheckDoubleAttack()) {
 					Attack(target, hand, false, false, IsFromSpell);
 					auto flurrychance = aabonuses.FlurryChance + spellbonuses.FlurryChance +
 							    itembonuses.FlurryChance;

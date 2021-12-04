@@ -34,7 +34,7 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 			else if (level >= 55) {
 				return "Myrmidon";
 			}
-			else if (level >= 51) {
+			else if (level >= 20) {
 				return "Champion";
 			}
 			else {
@@ -53,7 +53,7 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 			else if (level >= 55) {
 				return "Templar";
 			}
-			else if (level >= 51) {
+			else if (level >= 20) {
 				return "Vicar";
 			}
 			else {
@@ -72,7 +72,7 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 			else if (level >= 55) {
 				return "Knight";
 			}
-			else if (level >= 51) {
+			else if (level >= 20) {
 				return "Cavalier";
 			}
 			else {
@@ -91,7 +91,7 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 			else if (level >= 55) {
 				return "Outrider";
 			}
-			else if (level >= 51) {
+			else if (level >= 20) {
 				return "Pathfinder";
 			}
 			else {
@@ -110,7 +110,7 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 			else if (level >= 55) {
 				return "Revenant";
 			}
-			else if (level >= 51) {
+			else if (level >= 20) {
 				return "Reaver";
 			}
 			else {
@@ -129,7 +129,7 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 			else if (level >= 55) {
 				return "Preserver";
 			}
-			else if (level >= 51) {
+			else if (level >= 20) {
 				return "Wanderer";
 			}
 			else {
@@ -148,7 +148,7 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 			else if (level >= 55) {
 				return "Master";
 			}
-			else if (level >= 51) {
+			else if (level >= 20) {
 				return "Disciple";
 			}
 			else {
@@ -167,7 +167,7 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 			else if (level >= 55) {
 				return "Troubadour";
 			}
-			else if (level >= 51) {
+			else if (level >= 20) {
 				return "Minstrel";
 			}
 			else {
@@ -186,7 +186,7 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 			else if (level >= 55) {
 				return "Blackguard";
 			}
-			else if (level >= 51) {
+			else if (level >= 20) {
 				return "Rake";
 			}
 			else {
@@ -205,7 +205,7 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 			else if (level >= 55) {
 				return "Luminary";
 			}
-			else if (level >= 51) {
+			else if (level >= 20) {
 				return "Mystic";
 			}
 			else {
@@ -224,7 +224,7 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 			else if (level >= 55) {
 				return "Defiler";
 			}
-			else if (level >= 51) {
+			else if (level >= 20) {
 				return "Heretic";
 			}
 			else {
@@ -243,7 +243,7 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 			else if (level >= 55) {
 				return "Evoker";
 			}
-			else if (level >= 51) {
+			else if (level >= 20) {
 				return "Channeler";
 			}
 			else {
@@ -262,7 +262,7 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 			else if (level >= 55) {
 				return "Conjurer";
 			}
-			if (level >= 51) {
+			if (level >= 20) {
 				return "Elementalist";
 			}
 			else {
@@ -281,7 +281,7 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 			else if (level >= 55) {
 				return "Beguiler";
 			}
-			else if (level >= 51) {
+			else if (level >= 20) {
 				return "Illusionist";
 			}
 			else {
@@ -300,7 +300,7 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 			else if (level >= 55) {
 				return "Animist";
 			}
-			else if (level >= 51) {
+			else if (level >= 20) {
 				return "Primalist";
 			}
 			else {
@@ -319,7 +319,7 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 			else if (level >= 55) {
 				return "Vehement";
 			}
-			else if (level >= 51) {
+			else if (level >= 20) {
 				return "Brawler";
 			}
 			else {
@@ -338,7 +338,7 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 			else if (level >= 55) {
 				return "Older Banker";
 			}
-			else if (level >= 51) {
+			else if (level >= 20) {
 				return "Old Banker";
 			}
 			else {

@@ -235,15 +235,9 @@ void Client::GoFish()
 
 	//multiple entries yeilds higher probability of dropping...
 	uint32 common_fish_ids[MAX_COMMON_FISH_IDS] = {
-		1038, // Tattered Cloth Sandals
-		1038, // Tattered Cloth Sandals
-		1038, // Tattered Cloth Sandals
 		13019, // Fresh Fish
-		13076, // Fish Scales
-		13076, // Fish Scales
-		7007, // Rusty Dagger
-		7007, // Rusty Dagger
-		7007 // Rusty Dagger
+		13019, // Fresh Fish
+		13019, // Fresh Fish
 
 	};
 

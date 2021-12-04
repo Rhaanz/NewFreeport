@@ -168,7 +168,6 @@ int32 Mob::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
 
 	if (IsNPC())
 		value += value*CastToNPC()->GetSpellFocusDMG()/100;
-
 	int32 value_BaseEffect = 0;
 	int32 extra_dmg = 0;
 	int16 chance = 0;
