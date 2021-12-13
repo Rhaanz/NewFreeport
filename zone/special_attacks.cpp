@@ -595,7 +595,7 @@ void Mob::TryBackstab(Mob *other, int ReuseTime) {
 			CastToClient()->CheckIncreaseSkill(EQ::skills::SkillBackstab, other, 10);
 		m_specialattacks = eSpecialAttacks::None;
 
-		int double_bs_front = aabonuses.TripleBackstab + itembonuses.Double_Backstab_Front + spellbonuses.Double_Backstab_Front;
+		int double_bs_front = aabonuses.Double_Backstab_Front + itembonuses.Double_Backstab_Front + spellbonuses.Double_Backstab_Front;
 		if (double_bs_front && other->GetHP() > 0 && zone->random.Roll(double_bs_front))
 			RogueBackstab(other, false, ReuseTime);
 	}
