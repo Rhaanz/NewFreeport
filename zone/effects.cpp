@@ -51,6 +51,9 @@ int32 Mob::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 	bool Critical = false;
 	int32 base_value = value;
 	int chance = 0;
+	float SpellRatio = RuleR(Spells, SpellRatio);
+	int32 SpellBonus = (itembonuses.SpellDmg * SpellRatio);
+
 
 	// Need to scale HT damage differently after level 40! It no longer scales by the constant value in the spell file. It scales differently, instead of 10 more damage per level, it does 30 more damage per level. So we multiply the level minus 40 times 20 if they are over level 40.
 	if ((spell_id == SPELL_HARM_TOUCH || spell_id == SPELL_HARM_TOUCH2 || spell_id == SPELL_IMP_HARM_TOUCH ) && GetLevel() > 40)
@@ -153,11 +156,7 @@ int32 Mob::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 	value -= GetFocusEffect(focusFcDamageAmt2, spell_id);
 	value -= GetFocusEffect(focusFcAmplifyAmt, spell_id);
 
-	if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg)
-		value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, base_value);
-
-	else if (!spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5)
-		 value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, base_value);
+		value += (value * SpellBonus) / 100.0f;
 
 	if (IsNPC() && CastToNPC()->GetSpellScale())
 		value = int(static_cast<float>(value) * CastToNPC()->GetSpellScale() / 100.0f);
@@ -206,6 +205,9 @@ int32 Mob::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
 	int32 base_value = value;
 	int32 extra_dmg = 0;
 	int16 chance = 0;
+	float DotRatio = RuleR(Spells, DotRatio);
+	float DotBonus = (itembonuses.SpellDmg * DotRatio);
+
 	chance += itembonuses.CriticalDoTChance + spellbonuses.CriticalDoTChance + aabonuses.CriticalDoTChance;
 
 	if (spellbonuses.CriticalDotDecay)
@@ -228,22 +230,7 @@ int32 Mob::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
 					GetFocusEffect(focusFcDamageAmt, spell_id) +
 					GetFocusEffect(focusFcDamageAmt2, spell_id) +
 					GetFocusEffect(focusFcAmplifyAmt, spell_id);
-					
-		if (RuleB(Spells, DOTsScaleWithSpellDmg)) {
-			if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg) {
-				extra_dmg += GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, base_value)*ratio/100;
-			}
-			else if(!spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5) {
-				extra_dmg += GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, base_value)*ratio/100;
-			}
-		}
-
-		if (extra_dmg) {
-			int duration = CalcBuffDuration(this, target, spell_id);
-			if (duration > 0)
-				extra_dmg /= duration;
-		}
-
+	
 		value -= extra_dmg;
 	}
 	else {
@@ -260,27 +247,15 @@ int32 Mob::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
 					GetFocusEffect(focusFcDamageAmt2, spell_id) +
 					GetFocusEffect(focusFcAmplifyAmt, spell_id);
 					
-		if (RuleB(Spells, DOTsScaleWithSpellDmg)) {
-			if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg) {
-				extra_dmg += GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, base_value);
-			}
-			else if(!spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5) {
-				extra_dmg += GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, base_value);
-			}
-		}
 
-		if (extra_dmg) {
-			int duration = CalcBuffDuration(this, target, spell_id);
-			if (duration > 0)
-				extra_dmg /= duration;
-		}
+			//extra_dmg += (itembonuses.SpellDmg * dotratio);
 
+			value += (value * DotBonus) / 100.0f;
 		value -= extra_dmg;
 	}
 
 	if (IsNPC() && CastToNPC()->GetSpellScale())
 		value = int(static_cast<float>(value) * CastToNPC()->GetSpellScale() / 100.0f);
-
 	return value;
 }
 
@@ -321,6 +296,15 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 	int32 base_value = value;
 	int16 critical_chance = 0;
 	int8  critical_modifier = 1;
+	float healratio = RuleR(Spells, HealRatio);
+	int32 HealBonus = (itembonuses.HealAmt * healratio);
+	int total_cast_time = 0;
+	if (spells[spell_id].recast_time >= spells[spell_id].recovery_time)
+		total_cast_time = spells[spell_id].recast_time + spells[spell_id].cast_time;
+	else
+		total_cast_time = spells[spell_id].recovery_time + spells[spell_id].cast_time;
+
+
 
 	if (spells[spell_id].buff_duration < 1) {
 		critical_chance += itembonuses.CriticalHealChance + spellbonuses.CriticalHealChance + aabonuses.CriticalHealChance;
@@ -364,9 +348,21 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 
 		value += GetFocusEffect(focusFcHealAmtCrit, spell_id); //SPA 396 Add before critical
 
-		if (!spells[spell_id].no_heal_damage_item_mod && itembonuses.HealAmt && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5) {
-			value += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, base_value); //Item Heal Amt Add before critical
+
+		value += (value * HealBonus) / 100.0f;
+		int proc_type = 0;
+		proc_type = SE_WeaponProc;
+		if (proc_type) {
+			value -= (value * HealBonus) / 100.0f;
 		}
+		else {
+			return value;
+		}
+
+		
+		
+		//value += (itembonuses.HealAmt*healratio); //Item Heal Amt Add before critical
+		
 
 		if (target) {
 			value += value * target->GetHealRate() / 100;  //SPA 120 modifies value after Focus Applied but before critical
