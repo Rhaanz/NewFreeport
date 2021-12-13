@@ -567,7 +567,7 @@ void Mob::TryBackstab(Mob *other, int ReuseTime) {
 			CastToClient()->Message(Chat::White,"Your fierce attack is executed with such grace, your target did not see it coming!");
 
 		RogueBackstab(other,false,ReuseTime);
-		if (level > 54) {
+		if (level >= 20) {
 			// TODO: 55-59 doesn't appear to match just checking double attack, 60+ does though
 			if(IsClient() && CastToClient()->CheckDoubleAttack())
 			{
