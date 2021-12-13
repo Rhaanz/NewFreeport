@@ -298,12 +298,7 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 	int8  critical_modifier = 1;
 	float healratio = RuleR(Spells, HealRatio);
 	int32 HealBonus = (itembonuses.HealAmt * healratio);
-	int total_cast_time = 0;
-	if (spells[spell_id].recast_time >= spells[spell_id].recovery_time)
-		total_cast_time = spells[spell_id].recast_time + spells[spell_id].cast_time;
-	else
-		total_cast_time = spells[spell_id].recovery_time + spells[spell_id].cast_time;
-
+	float hotratio = RuleR(Spells, HotRatio);
 
 
 	if (spells[spell_id].buff_duration < 1) {
@@ -393,22 +388,8 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 	else {
 		//Using IgnoreSpellDmgLvlRestriction to also allow healing to scale
 		int32 extra_heal = 0;
-		if (RuleB(Spells, HOTsScaleWithHealAmt)) {
-			if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.HealAmt) {
-				extra_heal += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, base_value);
-			}
-			else if(!spells[spell_id].no_heal_damage_item_mod && itembonuses.HealAmt && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5) {
-				extra_heal += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, base_value);
-			}
-		}
-		
-		if (extra_heal) {
-			int duration = CalcBuffDuration(this, target, spell_id);
-			if (duration > 0) {
-				extra_heal /= duration;
-				value += extra_heal;
-			}
-		}
+		value += (value * HealBonus) / 100.0f;
+
 
 		if (critical_chance && zone->random.Roll(critical_chance))
 			value *= critical_modifier;
