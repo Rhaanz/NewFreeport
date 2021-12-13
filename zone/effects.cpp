@@ -350,14 +350,6 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 
 
 		value += (value * HealBonus) / 100.0f;
-		int proc_type = 0;
-		proc_type = SE_WeaponProc;
-		if (proc_type) {
-			value -= (value * HealBonus) / 100.0f;
-		}
-		else {
-			return value;
-		}
 
 		
 		
