@@ -4028,11 +4028,12 @@ void Mob::HealDamage(uint32 amount, Mob *caster, uint16 spell_id)
 	else
 		acthealed = amount;
 
-	if (acthealed > 100) {
+	if (acthealed >= 1) {
 		if (caster) {
 			if (IsBuffSpell(spell_id)) { // hots
 										 // message to caster
 				if (caster->IsClient() && caster == this) {
+
 					if (caster->CastToClient()->ClientVersionBit() & EQ::versions::maskSoFAndLater)
 						FilteredMessageString(caster, Chat::NonMelee, FilterHealOverTime,
 							HOT_HEAL_SELF, itoa(acthealed), spells[spell_id].name);
