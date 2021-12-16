@@ -3514,7 +3514,7 @@ void EntityList::ClearFeignAggro(Mob *targ)
 
 			it->second->RemoveFromHateList(targ);
 			if (targ->IsClient()) {
-				if (it->second->GetLevel() >= 35 && zone->random.Roll(60))
+				if (it->second->GetLevel() >= 16 && zone->random.Roll(60))
 					it->second->AddFeignMemory(targ->CastToClient());
 				else
 					targ->CastToClient()->RemoveXTarget(it->second, false);
