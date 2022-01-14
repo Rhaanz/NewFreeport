@@ -123,13 +123,11 @@ int32 Mob::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 			value -= GetFocusEffect(focusFcDamageAmt2, spell_id);
 			value -= GetFocusEffect(focusFcAmplifyAmt, spell_id);
 
-			if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg)
-				value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, base_value)*ratio / 100;
+			if (total_cast_time > 1000) {				 //
+				value += (value * SpellBonus) / 100.0f; //made critical calc match noncrit calc
+			}
 
-			else if(!spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5)
-				value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, base_value)*ratio/100;
-
-			else if (IsNPC() && CastToNPC()->GetSpellScale())
+			if (IsNPC() && CastToNPC()->GetSpellScale()) // elseif changed to if
 				value = int(static_cast<float>(value) * CastToNPC()->GetSpellScale() / 100.0f);
 
 			entity_list.MessageCloseString(
