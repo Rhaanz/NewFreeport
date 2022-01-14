@@ -3067,38 +3067,38 @@ void Client::BuyerItemSearch(const EQApplicationPacket *app) {
 
 	int Count=0;
 
-	char Name[64];
-	char Criteria[255];
+	//char Name[64];
+	//char Criteria[255];
 
-	strn0cpy(Criteria, bis->SearchString, sizeof(Criteria));
+	//strn0cpy(Criteria, bis->SearchString, sizeof(Criteria));
 
-	strupr(Criteria);
+	//strupr(Criteria);
 
-	char* pdest;
+	//char* pdest;
 
-	uint32 it = 0;
+	//uint32 it = 0;
 
-	while ((item = database.IterateItems(&it))) {
+	//while ((item = database.IterateItems(&it))) {
 
-		strn0cpy(Name, item->Name, sizeof(Name));
+	//	strn0cpy(Name, item->Name, sizeof(Name));
 
-		strupr(Name);
+	//	strupr(Name);
 
-		pdest = strstr(Name, Criteria);
+	//	pdest = strstr(Name, Criteria);
 
-		if (pdest != nullptr) {
-			sprintf(bisr->Results[Count].ItemName, "%s", item->Name);
-			bisr->Results[Count].ItemID = item->ID;
-			bisr->Results[Count].Unknown068 = item->Icon;
-			bisr->Results[Count].Unknown072 = 0x00000000;
-			Count++;
-		}
-		if (Count == MAX_BUYER_ITEMSEARCH_RESULTS)
-			break;
-	}
-	if (Count == MAX_BUYER_ITEMSEARCH_RESULTS)
-		Message(Chat::Yellow, "Your search returned more than %i results. Only the first %i are displayed.",
-				MAX_BUYER_ITEMSEARCH_RESULTS, MAX_BUYER_ITEMSEARCH_RESULTS);
+	//	if (pdest != nullptr) {
+	//		sprintf(bisr->Results[Count].ItemName, "%s", item->Name);
+	//		bisr->Results[Count].ItemID = item->ID;
+	//		bisr->Results[Count].Unknown068 = item->Icon;
+	//		bisr->Results[Count].Unknown072 = 0x00000000;
+	//		Count++;
+	//	}
+	//	if (Count == MAX_BUYER_ITEMSEARCH_RESULTS)
+	//		break;
+	//}
+	//if (Count == MAX_BUYER_ITEMSEARCH_RESULTS)
+	//	Message(Chat::Yellow, "Your search returned more than %i results. Only the first %i are displayed.",
+	//			MAX_BUYER_ITEMSEARCH_RESULTS, MAX_BUYER_ITEMSEARCH_RESULTS);
 
 	bisr->Action = Barter_BuyerSearch;
 	bisr->ResultCount = Count;
