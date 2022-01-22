@@ -1077,6 +1077,13 @@ void QuestManager::snow(int weather) {
 	safe_delete(outapp);
 }
 
+//start nate edit for hotzones
+void QuestManager::sethotzone(bool value) {
+	QuestManagerCurrentQuestVars();
+	zone->SetIsHotzone(value);
+}
+///
+
 void QuestManager::rename(std::string name) {
 	QuestManagerCurrentQuestVars();
 	if (initiator && initiator->IsClient()) {
